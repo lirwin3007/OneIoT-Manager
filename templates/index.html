@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block script %}index{% endblock %}
+
+{% block vue_instance %}
+  var app = new Vue({
+    el: '#vue-root',
+    delimiters: ['[[',']]'],
+    data: {
+      deviceIds: {{ deviceIds | safe }}
+    }
+  });
+{% endblock %}
+
+{% block body %}
+  <section class="section">
+    <devices :device-ids="deviceIds" />
+  </section>
+{% endblock %}

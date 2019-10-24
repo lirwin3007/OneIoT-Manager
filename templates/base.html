@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    {% include 'head.html' %}
+    <script src="/static/js/{% block script %}{% endblock %}.js"></script>
+  </head>
+  <body>
+    <div id="vue-root">
+      {% include 'header.html' %}
+
+      <div id="body">
+        {% block body %}
+        {% endblock %}
+      </div>
+
+      {% include 'footer.html' %}
+    </div>
+  </body>
+
+  <script>
+    {% block vue_instance %}
+    {% endblock %}
+  </script>
+
+</html>

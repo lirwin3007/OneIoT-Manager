@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block script %}program{% endblock %}
+
+{% block vue_instance %}
+  var app = new Vue({
+    el: '#vue-root',
+    delimiters: ['[[',']]'],
+    data: {
+      device: null,
+    },
+    mounted() {
+      this.getDevice();
+    },
+    computed: {
+      loading() {
+        return this.device == null;
+      },
+      deviceId() {
+        var url = window.location.href.split("/")
+        return url[url.length - 2];
+      }
+    },
+    methods: {
+      getDevice() {
+        axios.get(`/device/${this.deviceId}`).then( (response) => {
+          this.device = response.data;
+        });
+      }
+    }
+  });
+{% endblock %}
+
+{% block body %}
+  <section class="section">
+
+    <code-editor v-if="!loading" :device="device" />
+    <b-loading :active.sync="loading" />
+    
+  </section>
+{% endblock %}
