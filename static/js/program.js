@@ -77,9 +77,23 @@ Vue.component("code-editor", {
 
 Vue.component("function-test", {
   template: ` <card :title="functionName">
-                <b-field v-for="arg in args" :label="arg">
-                  <b-input @input="updateArgValue(arg, $event)"></b-input>
-                </b-field>
+                <parameter-input
+                  v-for="arg in args"
+                  :name="arg"
+                  @input="updateArgValue(arg, $event)"
+                  @changetype="updateArgType(arg, $event)"
+                />
+                <div class="box is-italic">
+                  <div v-if="result && !nullResult">
+                    Result: {{ result }}
+                  </div>
+                  <div v-if="!result && !nullResult">
+                    Press 'Run' to see result here
+                  </div>
+                  <div v-if="nullResult">
+                    Result: None
+                  </div>
+                </div>
                 <template v-slot:footer>
                   <a @click="run" class="card-footer-item">Run</a>
                 </template>
@@ -92,23 +106,68 @@ Vue.component("function-test", {
   data() {
     return {
       argValues: {},
+      result: null,
+      nullResult: false,
     }
   },
   mounted() {
     for (arg of this.args) {
-      this.argValues[arg] = null;
+      this.argValues[arg] = {value: null, type: "String"};
     }
   },
   methods: {
+    updateArgType(arg, type) {
+      this.argValues[arg]['type'] = type;
+      this.argValues[arg]['value'] = null;
+    },
     updateArgValue(arg, value) {
-      this.argValues[arg] = value;
+      this.argValues[arg]['value'] = value;
     },
     run() {
       axios.post(`/device/${this.deviceId}/call/${this.functionName}`, this.argValues).then( (response) => {
-        console.log(response);
+        this.result = response.data;
+        if (this.result == null) {
+          this.nullResult = true;
+        }
       });
     }
   }
+});
+
+Vue.component("parameter-input", {
+  template: ` <b-field :label="name" label-position="on-border">
+                <b-input v-if="showInputType == 'input'" @input="$emit('input', $event)"></b-input>
+                <b-checkbox v-if="showInputType == 'check'" @input="$emit('input', $event)"></b-checkbox>
+                <b-numberinput v-if="showInputType == 'numeric'" @input="$emit('input', $event)"></b-numberinput>
+                <p class="control">
+                  <b-select v-model="type" @input="$emit('changetype', type)" placeholder="Select a name">
+                    <option>String</option>
+                    <option>Integer</option>
+                    <option>Boolean</option>
+                  </b-select>
+                </p>
+              </b-field>`,
+  props: {
+    name: String,
+  },
+  data(){
+    return {
+      type: "String"
+    };
+  },
+  computed: {
+    showInputType() {
+      if (this.type == "String") {
+        return "input";
+      }
+      if (this.type == "Boolean") {
+        return "check";
+      }
+      if (this.type == "Integer") {
+        return "numeric";
+      }
+    }
+  },
 });
 
 Vue.component("file-tree", {

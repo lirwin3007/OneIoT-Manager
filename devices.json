@@ -1,0 +1,16 @@
+{
+  "test": {
+    "buttons": [
+      {
+        "display": "Turn On",
+        "function": "led_state",
+        "args": {"state":{"value":1, "type":"Integer"}}
+      },
+      {
+        "display": "Turn Off",
+        "function": "led_state",
+        "args": {"state":{"value":0, "type":"Integer"}}
+      }
+    ]
+  }
+}

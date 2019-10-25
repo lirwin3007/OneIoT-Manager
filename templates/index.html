@@ -6,13 +6,14 @@
     el: '#vue-root',
     delimiters: ['[[',']]'],
     data: {
-      deviceIds: {{ deviceIds | safe }}
+      deviceIds: {{ deviceIds | safe }},
+      deviceData: {{ device_data | safe }}
     }
   });
 {% endblock %}
 
 {% block body %}
   <section class="section">
-    <devices :device-ids="deviceIds" />
+    <devices :device-ids="deviceIds" :device-data="deviceData" />
   </section>
 {% endblock %}

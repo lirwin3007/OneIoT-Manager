@@ -9,17 +9,25 @@ Vue.component("devices", {
                       class="tile is-child"
                       key="deviceId"
                       :device-id="deviceId"
+                      :device-buttons="deviceData[deviceId].buttons"
                     />
                   </div>
                 </div>
               </div>`,
   props: {
     deviceIds: Array,
+    deviceData: Object,
   }
 });
 
 Vue.component("deviceCard", {
   template: ` <card v-if="device" :title="deviceId" icon="fa-plug" :icon-class="iconClass">
+                <div class="container" v-for="buttonData in deviceButtons">
+                  <device-button
+                    :button-data="buttonData"
+                    :device-id="deviceId"
+                  />
+                </div>
                 <template v-slot:footer>
                   <b-loading :is-full-page="false" :active.sync="connectionLoading"></b-loading>
                   <a @click="connect" v-if="!device.connected" class="card-footer-item">Connect</a>
@@ -36,6 +44,7 @@ Vue.component("deviceCard", {
   },
   props: {
     deviceId: String,
+    deviceButtons: Array,
   },
   mounted() {
     this.getDevice();
@@ -92,6 +101,26 @@ Vue.component("deviceCard", {
           });
           this.connectionLoading = false;
         }
+      });
+    }
+  }
+});
+
+Vue.component("device-button", {
+  template: ` <b-button @click="onClick">
+                {{ buttonData.display }}
+              </b-button>`,
+  props: {
+    deviceId: String,
+    buttonData: Object,
+  },
+  methods: {
+    onClick() {
+      axios.post(`/device/${this.deviceId}/call/${this.buttonData.function}`, this.buttonData.args).then( (response) => {
+        this.$buefy.toast.open({
+          message: '"' + this.buttonData.display + '" ran succesfully',
+          type: 'is-success'
+        });
       });
     }
   }

@@ -8,10 +8,15 @@ app = Flask(__name__)
 
 deviceManager = OneIoT.DeviceManager()
 
+def get_device_data():
+    result = json.load(open('devices.json'))
+    return result
+
 @app.route('/')
 def index():
     devices = deviceManager.get_devices().keys()
-    return render_template("index.html", deviceIds=json.dumps(list(devices)))
+    device_data = get_device_data()
+    return render_template("index.html", deviceIds=json.dumps(list(devices)), device_data=device_data)
 
 @app.route('/device/<device_id>')
 def get_device(device_id):
@@ -56,14 +61,14 @@ def upload(device_id):
 
 @app.route('/device/<device_id>/call/<function>', methods=['POST'])
 def call(device_id, function):
-    #try:
-    device = deviceManager.get_device(device_id)
-    args = json.loads(request.get_data().decode("utf-8"))
-    args = [args[x] for x in args]
-    result = getattr(device, function).__call__(args)
-    return json.dumps(True)
-    #except:
-    #    return json.dumps(False)
+    try:
+        device = deviceManager.get_device(device_id)
+        args = json.loads(request.get_data().decode("utf-8"))
+        args = [args[x]['value'] for x in args]
+        result = getattr(device, function).__call__(*args)
+        return json.dumps(result)
+    except:
+        return json.dumps(False)
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')
