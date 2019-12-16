@@ -8,12 +8,18 @@
     data: {
       deviceIds: {{ deviceIds | safe }},
       deviceData: {{ device_data | safe }}
+    },
+    methods: {
+      remove(deviceId) {
+        this.deviceIds = this.deviceIds.filter(id => id != deviceId);
+        delete this.deviceData[deviceId];
+      }
     }
   });
 {% endblock %}
 
 {% block body %}
   <section class="section">
-    <devices :device-ids="deviceIds" :device-data="deviceData" />
+    <devices :device-ids="deviceIds" :device-data="deviceData" @remove="remove($event)" />
   </section>
 {% endblock %}

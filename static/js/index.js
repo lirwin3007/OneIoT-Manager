@@ -9,10 +9,12 @@ Vue.component("devices", {
                       class="tile is-child"
                       key="deviceId"
                       :device-id="deviceId"
-                      :device-buttons="deviceData[deviceId].buttons"
+                      :device-buttons="deviceData[deviceId] ? deviceData[deviceId].buttons : []"
+                      @remove="$emit('remove', $event)"
                     />
                   </div>
                 </div>
+                <deviceCardPlaceholder />
               </div>`,
   props: {
     deviceIds: Array,
@@ -30,16 +32,18 @@ Vue.component("deviceCard", {
                 </div>
                 <template v-slot:footer>
                   <b-loading :is-full-page="false" :active.sync="connectionLoading"></b-loading>
+                  <b-loading :is-full-page="false" :active.sync="deleteLoading"></b-loading>
                   <a @click="connect" v-if="!device.connected" class="card-footer-item">Connect</a>
                   <a @click="disconnect" v-if="device.connected" class="card-footer-item">Disconnect</a>
                   <a @click="program" class="card-footer-item">Program</a>
-                  <a class="card-footer-item has-text-danger">Delete</a>
+                  <a @click="remove" class="card-footer-item has-text-danger">Delete</a>
                 </template>
               </card>`,
   data() {
     return {
       device: {},
       connectionLoading: false,
+      deleteLoading: false,
     };
   },
   props: {
@@ -67,7 +71,7 @@ Vue.component("deviceCard", {
       this.connectionLoading = true;
       this.$buefy.toast.open('Connecting to ' + this.device.id);
       axios.get(`/device/${this.device.id}/connect`).then( (response) => {
-        if (response.data) {
+        if (response.data.result) {
           this.getDevice();
           this.$buefy.toast.open({
             message: 'Connected to ' + this.device.id,
@@ -76,7 +80,7 @@ Vue.component("deviceCard", {
           this.connectionLoading = false;
         } else {
           this.$buefy.toast.open({
-            message: 'Failed to connect to ' + this.device.id,
+            message: 'Failed to connect to ' + this.device.id + '. ' + response.data.error,
             type: 'is-danger'
           });
           this.connectionLoading = false;
@@ -102,6 +106,36 @@ Vue.component("deviceCard", {
           this.connectionLoading = false;
         }
       });
+    },
+    remove() {
+      this.deleteLoading = true;
+      axios.get(`/device/${this.device.id}/remove`).then( (response) => {
+        if (response.data.result) {
+          this.$emit('remove', this.device.id);
+          this.$buefy.toast.open({
+            message: 'Succesfully deleted ' + this.device.id,
+            type: 'is-success'
+          });
+          this.deleteLoading = false;
+        } else {
+          this.$buefy.toast.open({
+            message: 'Failed to delete ' + this.device.id + '. ' + response.data.error,
+            type: 'is-danger'
+          });
+          this.deleteLoading = false;
+        }
+      });
+    }
+  }
+});
+
+Vue.component("deviceCardPlaceholder", {
+  template: ` <card @click="addDevice" style="cursor: pointer;">
+                + Add Device
+              </card>`,
+  methods: {
+    addDevice() {
+      window.location.href = `/add-device`;
     }
   }
 });

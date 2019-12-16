@@ -3,12 +3,26 @@
     "buttons": [
       {
         "display": "Turn On",
-        "function": "led_state",
+        "function": "switch",
         "args": {"state":{"value":1, "type":"Integer"}}
       },
       {
         "display": "Turn Off",
-        "function": "led_state",
+        "function": "switch",
+        "args": {"state":{"value":0, "type":"Integer"}}
+      }
+    ]
+  },
+  "test_2": {
+    "buttons": [
+      {
+        "display": "Turn On",
+        "function": "switch",
+        "args": {"state":{"value":1, "type":"Integer"}}
+      },
+      {
+        "display": "Turn Off",
+        "function": "switch",
         "args": {"state":{"value":0, "type":"Integer"}}
       }
     ]

@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block script %}add_device{% endblock %}
+
+{% block vue_instance %}
+  var app = new Vue({
+    el: '#vue-root',
+    delimiters: ['[[',']]']
+  });
+{% endblock %}
+
+{% block body %}
+  <section class="section">
+    <add-device-form />
+  </section>
+{% endblock %}

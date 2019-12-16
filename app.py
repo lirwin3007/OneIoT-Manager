@@ -1,12 +1,13 @@
 from flask import Flask, request, render_template
 
 import json
+import serial.tools.list_ports
 
-import OneIoT
+import oneiot
 
 app = Flask(__name__)
 
-deviceManager = OneIoT.DeviceManager()
+deviceManager = oneiot.DeviceManager()
 
 def get_device_data():
     result = json.load(open('devices.json'))
@@ -17,6 +18,23 @@ def index():
     devices = deviceManager.get_devices().keys()
     device_data = get_device_data()
     return render_template("index.html", deviceIds=json.dumps(list(devices)), device_data=device_data)
+
+@app.route('/add-device')
+def add_device():
+    return render_template("add_device.html")
+
+@app.route('/add-device/ports')
+def add_device_ports():
+    return json.dumps([x.name for x in serial.tools.list_ports.comports()])
+
+@app.route('/add-device/init', methods=['POST'])
+def add_device_init():
+    try:
+        deviceManager.add_device(request.json['id'], request.json['port'])
+        deviceManager.init_device(request.json['id'], request.json['port'])
+        return json.dumps({'result': True})
+    except Exception as e:
+        return json.dumps({'result': False, 'error': str(e)})
 
 @app.route('/device/<device_id>')
 def get_device(device_id):
@@ -33,9 +51,9 @@ def get_device(device_id):
 def connect(device_id):
     try:
         deviceManager.get_device(device_id).connect()
-        return json.dumps(True)
-    except:
-        return json.dumps(False)
+        return json.dumps({'result': True})
+    except Exception as e:
+        return json.dumps({'result': False, 'error':str(e)})
 
 @app.route('/device/<device_id>/disconnect')
 def disconnect(device_id):
@@ -44,6 +62,14 @@ def disconnect(device_id):
         return json.dumps(True)
     except:
         return json.dumps(False)
+
+@app.route('/device/<device_id>/remove')
+def remove(device_id):
+    try:
+        deviceManager.remove_device(device_id)
+        return json.dumps({'result': True})
+    except Exception as e:
+        return json.dumps({'result': False, 'error':str(e)})
 
 @app.route('/device/<device_id>/program')
 def program(device_id):

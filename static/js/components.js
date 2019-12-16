@@ -1,6 +1,6 @@
 Vue.component("card", {
   template: ` <div class="card">
-                <header class="card-header">
+                <header class="card-header" v-if="title">
                   <p class="card-header-title">
                     {{ title }}
                   </p>
@@ -10,7 +10,7 @@ Vue.component("card", {
                     </span>
                   </a>
                 </header>
-                <div class="card-content" :class="{'is-paddingless': paddingless}">
+                <div class="card-content" :class="{'is-paddingless': paddingless}" @click="$emit('click')">
                   <div class="content">
                     <slot></slot>
                   </div>
