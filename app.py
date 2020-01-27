@@ -80,9 +80,9 @@ def upload(device_id):
     try:
         device = deviceManager.get_device(device_id)
         code = request.get_data().decode("utf-8")
-        device.uploadString(code, "user.py")
+        device.program(code)
         return json.dumps(True)
-    except:
+    except Exception as e:
         return json.dumps(False)
 
 @app.route('/device/<device_id>/call/<function>', methods=['POST'])
@@ -90,10 +90,10 @@ def call(device_id, function):
     try:
         device = deviceManager.get_device(device_id)
         args = json.loads(request.get_data().decode("utf-8"))
-        args = [args[x]['value'] for x in args]
-        result = getattr(device, function).__call__(*args)
+        result = device.send(function, args)#getattr(device, function).__call__(*args)
         return json.dumps(result)
-    except:
+    except Exception as e:
+        print(e)
         return json.dumps(False)
 
 if __name__ == '__main__':
